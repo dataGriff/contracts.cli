@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/csv"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -256,11 +257,20 @@ func newMockCommand() *cobra.Command {
 		service      string
 		contractType string
 		name         string
+		rows         int
+		outputFormat string
 	)
 
 	cmd := &cobra.Command{
 		Use:   "mock",
 		Short: "Generate mock data from a contract",
+		Long: `Generate mock data from a contract.
+
+For ODCS (data contracts), you can specify:
+  --output dataframe: Display mock data as an interactive table
+  --output csv: Display mock data as CSV
+  --output json: Display mock data as JSON (default)
+  --rows N: Number of rows to generate (default: 10)`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if domain == "" || service == "" || contractType == "" || name == "" {
 				return fmt.Errorf("all flags are required: --domain, --service, --type, --name")
@@ -271,6 +281,40 @@ func newMockCommand() *cobra.Command {
 				return err
 			}
 
+			// For ODCS contracts with dataframe or csv output
+			if contract.Type == "odcs" && (outputFormat == "dataframe" || outputFormat == "csv") {
+				df, err := mockGen.GenerateMockDataFrame(contract, rows)
+				if err != nil {
+					return fmt.Errorf("failed to generate mock dataframe: %w", err)
+				}
+
+				fmt.Printf("Mock data for: %s/%s/%s/%s\n", domain, service, contractType, name)
+				fmt.Printf("Generated %d rows\n", rows)
+				fmt.Println("---")
+
+				if outputFormat == "csv" {
+					// Output as CSV
+					writer := csv.NewWriter(os.Stdout)
+					records := df.Records()
+					for _, record := range records {
+						writer.Write(record)
+					}
+					writer.Flush()
+				} else {
+					// Output as formatted table
+					fmt.Println(df)
+					fmt.Println()
+					fmt.Println("DataFrame operations available:")
+					rows, cols := df.Dims()
+					fmt.Printf("  • Dimensions: %d rows × %d columns\n", rows, cols)
+					fmt.Println("  • Column names:", df.Names())
+					fmt.Println("  • Data types:", df.Types())
+				}
+
+				return nil
+			}
+
+			// Default JSON output
 			mockData, err := mockGen.GenerateMock(contract)
 			if err != nil {
 				return fmt.Errorf("failed to generate mock: %w", err)
@@ -288,6 +332,8 @@ func newMockCommand() *cobra.Command {
 	cmd.Flags().StringVar(&service, "service", "", "Service name (required)")
 	cmd.Flags().StringVar(&contractType, "type", "", "Contract type: openapi, odcs, or asyncapi (required)")
 	cmd.Flags().StringVar(&name, "name", "", "Contract file name (required)")
+	cmd.Flags().IntVar(&rows, "rows", 10, "Number of rows to generate for ODCS contracts (default: 10)")
+	cmd.Flags().StringVar(&outputFormat, "output", "json", "Output format: json, csv, or dataframe (for ODCS only)")
 
 	cmd.MarkFlagRequired("domain")
 	cmd.MarkFlagRequired("service")
