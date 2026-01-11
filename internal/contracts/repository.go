@@ -99,7 +99,7 @@ func (r *Repository) ListContracts(domain, service string) ([]Contract, error) {
 		}
 
 		for _, entry := range entries {
-			if !entry.IsDir() && (strings.HasSuffix(entry.Name(), ".yaml") || strings.HasSuffix(entry.Name(), ".yml")) {
+			if !entry.IsDir() && isYAMLFile(entry.Name()) {
 				contracts = append(contracts, Contract{
 					Domain:  domain,
 					Service: service,
@@ -162,4 +162,9 @@ func (r *Repository) ListAllContracts() ([]Contract, error) {
 	}
 
 	return allContracts, nil
+}
+
+// isYAMLFile checks if a filename has a YAML extension
+func isYAMLFile(filename string) bool {
+	return strings.HasSuffix(filename, ".yaml") || strings.HasSuffix(filename, ".yml")
 }

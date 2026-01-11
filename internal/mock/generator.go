@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/dataGriff/contracts.cli/internal/contracts"
 	"gopkg.in/yaml.v3"
@@ -158,7 +159,7 @@ func (g *Generator) generateAsyncAPIMock(contract *contracts.Contract) (string, 
 				}
 
 				event["mockPayload"] = map[string]interface{}{
-					"timestamp": "2024-01-01T00:00:00Z",
+					"timestamp": time.Now().Format(time.RFC3339),
 					"data":      "Mock event data for " + channelName,
 				}
 
