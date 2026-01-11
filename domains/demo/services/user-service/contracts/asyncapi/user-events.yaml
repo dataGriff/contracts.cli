@@ -1,0 +1,73 @@
+asyncapi: 2.6.0
+info:
+  title: User Service Events
+  version: 1.0.0
+  description: Async events emitted by the User Service
+servers:
+  production:
+    url: kafka://kafka.example.com:9092
+    protocol: kafka
+    description: Production Kafka broker
+channels:
+  user.created:
+    description: Channel for user creation events
+    publish:
+      summary: Notify when a new user is created
+      message:
+        $ref: '#/components/messages/UserCreated'
+  user.updated:
+    description: Channel for user update events
+    publish:
+      summary: Notify when a user is updated
+      message:
+        $ref: '#/components/messages/UserUpdated'
+  user.deleted:
+    description: Channel for user deletion events
+    publish:
+      summary: Notify when a user is deleted
+      message:
+        $ref: '#/components/messages/UserDeleted'
+components:
+  messages:
+    UserCreated:
+      name: UserCreated
+      title: User Created Event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          userId:
+            type: string
+          username:
+            type: string
+          email:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+    UserUpdated:
+      name: UserUpdated
+      title: User Updated Event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          userId:
+            type: string
+          changes:
+            type: object
+          timestamp:
+            type: string
+            format: date-time
+    UserDeleted:
+      name: UserDeleted
+      title: User Deleted Event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          userId:
+            type: string
+          timestamp:
+            type: string
+            format: date-time

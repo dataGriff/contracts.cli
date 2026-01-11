@@ -1,0 +1,52 @@
+dataContractSpecification: 3.1.0
+id: order-data-contract
+info:
+  title: Order Data Contract
+  version: 1.0.0
+  description: Data contract for order information
+  owner: Order Service Team
+  contact:
+    name: Data Team
+    email: data@example.com
+servers:
+  production:
+    type: postgres
+    host: db.example.com
+    port: 5432
+    database: orders_db
+models:
+  orders:
+    description: Order transaction data
+    type: table
+    fields:
+      id:
+        type: uuid
+        required: true
+        primaryKey: true
+        description: Unique identifier for the order
+      user_id:
+        type: uuid
+        required: true
+        description: Reference to user who placed the order
+      total_amount:
+        type: decimal
+        required: true
+        description: Total order amount
+      status:
+        type: string
+        required: true
+        enum: [pending, confirmed, shipped, delivered, cancelled]
+        description: Current order status
+      created_at:
+        type: timestamp
+        required: true
+        description: Order creation timestamp
+      updated_at:
+        type: timestamp
+        description: Last update timestamp
+quality:
+  type: SLA
+  specification:
+    availability: 99.95%
+    freshness: 5m
+    completeness: 99%

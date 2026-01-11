@@ -1,0 +1,50 @@
+dataContractSpecification: 3.1.0
+id: user-data-contract
+info:
+  title: User Data Contract
+  version: 1.0.0
+  description: Data contract for user information
+  owner: User Service Team
+  contact:
+    name: Data Team
+    email: data@example.com
+servers:
+  production:
+    type: postgres
+    host: db.example.com
+    port: 5432
+    database: users_db
+models:
+  users:
+    description: User profile data
+    type: table
+    fields:
+      id:
+        type: uuid
+        required: true
+        primaryKey: true
+        description: Unique identifier for the user
+      username:
+        type: string
+        required: true
+        unique: true
+        description: User's unique username
+      email:
+        type: string
+        required: true
+        unique: true
+        format: email
+        description: User's email address
+      created_at:
+        type: timestamp
+        required: true
+        description: Account creation timestamp
+      updated_at:
+        type: timestamp
+        description: Last update timestamp
+quality:
+  type: SLA
+  specification:
+    availability: 99.9%
+    freshness: 1h
+    completeness: 95%
