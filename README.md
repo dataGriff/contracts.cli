@@ -6,14 +6,14 @@ A CLI tool that allows you to interact with different contract types including O
 
 - **List** domains, services, and contracts
 - **Print** contract contents
-- **Mock** contracts to generate sample data
+- **Mock** contracts to generate sample data in CSV, JSON, or table format
 - Support for multiple contract types:
   - OpenAPI 3.0
   - Open Data Contract Specification (ODCS 3.1)
   - AsyncAPI 2.6
 - Organized folder structure: domains → services → contracts
 - Built-in demo domain with example contracts
-- **Python integration** for interactive data analysis with Pandas
+- **Universal CSV output** for use with any data analysis tool
 
 ## Installation
 
@@ -70,43 +70,62 @@ The CLI provides several commands to interact with contracts:
 Generate mock data in different formats:
 
 ```bash
-# Default JSON output for all contract types
-./contracts mock --domain demo --service user-service --type openapi --name user-api.yaml
+# Generate CSV for data analysis (recommended)
+./contracts mock --domain demo --service order-service --type odcs --name order-data.yaml --output csv --rows 1000 > mock_data/orders.csv
 
-# For ODCS (data contracts), generate interactive dataframes
+# View as formatted table
 ./contracts mock --domain demo --service order-service --type odcs --name order-data.yaml --output dataframe --rows 10
 
-# Generate CSV output for easy export
-./contracts mock --domain demo --service order-service --type odcs --name order-data.yaml --output csv --rows 20
-
-# Customize the number of rows (default is 10)
-./contracts mock --domain demo --service user-service --type odcs --name user-data.yaml --output dataframe --rows 50
+# Generate JSON for API testing
+./contracts mock --domain demo --service user-service --type openapi --name user-api.yaml
 ```
 
 #### Mock Output Formats
 
 **For ODCS (Data Contracts):**
-- `--output dataframe` (default for ODCS): Interactive tabular view with metadata
-- `--output csv`: CSV format for easy export and analysis
+- `--output csv`: CSV format - universal, works with any tool
+- `--output dataframe`: Formatted table view with metadata
 - `--output json`: Traditional JSON format
 - `--rows N`: Number of mock rows to generate (default: 10)
 
 **For OpenAPI and AsyncAPI:**
 - JSON format with mock endpoints/events
 
-The dataframe output provides:
-- Formatted table view of mock data
-- Column names and data types
-- Dimensions (rows × columns)
-- Realistic mock data based on field types (UUIDs, timestamps, decimals, etc.)
+#### Working with Generated Data
 
-#### Exporting Mock Data
-
-You can redirect CSV output to a file for analysis:
+Save CSV files to the `mock_data/` directory (git-ignored):
 
 ```bash
-./contracts mock --domain demo --service order-service --type odcs --name order-data.yaml --output csv --rows 100 > mock_data.csv
+# Generate mock data
+./contracts mock --domain demo --service order-service --type odcs --name order-data.yaml --output csv --rows 5000 > mock_data/orders.csv
+./contracts mock --domain demo --service user-service --type odcs --name user-data.yaml --output csv --rows 1000 > mock_data/users.csv
 ```
+
+Then load in your preferred tool:
+
+**Python (Pandas):**
+```python
+import pandas as pd
+orders = pd.read_csv('mock_data/orders.csv')
+orders['created_at'] = pd.to_datetime(orders['created_at'])
+print(orders.query('total_amount > 500'))
+```
+
+**R:**
+```r
+library(tidyverse)
+orders <- read_csv('mock_data/orders.csv')
+orders %>% filter(total_amount > 500)
+```
+
+**DuckDB (SQL):**
+```sql
+SELECT status, SUM(total_amount) 
+FROM 'mock_data/orders.csv' 
+GROUP BY status;
+```
+
+See [examples/README.md](examples/README.md) for complete examples in Python, R, DuckDB, Excel, and more.
 
 ## Folder Structure
 
@@ -153,79 +172,17 @@ ODCS 3.1 contracts define data models, schemas, and quality specifications for d
 ### AsyncAPI
 AsyncAPI specifications define event-driven and message-based API contracts.
 
-## Python Integration
+## Why CSV Output?
 
-For interactive data analysis and querying, use the Python wrapper with Pandas:
+The CLI generates universal CSV output that works with any analysis tool:
 
-### Setup
+- **Universal**: Python, R, Excel, SQL databases, BI tools - everything reads CSV
+- **Simple**: Easy to inspect, debug, and version control
+- **Fast**: Efficient for datasets from 100 to millions of rows
+- **Flexible**: Use your preferred tools and workflows
+- **Composable**: Follows Unix philosophy - do one thing well
 
-```bash
-# Install Python dependencies
-pip install -r requirements.txt
-```
-
-### Quick Start
-
-```python
-from contracts_cli import ContractsCLI, quick_mock
-
-# Quick way to get a DataFrame
-df = quick_mock(domain='demo', service='order-service', contract='order-data.yaml', rows=1000)
-
-# Analyze with Pandas
-print(df.describe())
-print(df.query('total_amount > 500'))
-print(df.groupby('status')['total_amount'].sum())
-```
-
-### Advanced Usage
-
-```python
-from contracts_cli import ContractsCLI
-import pandas as pd
-
-# Initialize the wrapper
-cli = ContractsCLI()
-
-# List available contracts
-domains = cli.list_domains()
-services = cli.list_services('demo')
-contracts = cli.list_contracts('demo', 'order-service')
-
-# Generate and analyze mock data
-orders = cli.mock_data('demo', 'order-service', 'order-data.yaml', rows=5000)
-users = cli.mock_data('demo', 'user-service', 'user-data.yaml', rows=1000)
-
-# Perform complex queries
-high_value_orders = orders[orders['total_amount'] > 500]
-revenue_by_status = orders.groupby('status').agg({
-    'total_amount': ['sum', 'mean', 'count']
-})
-
-# Join datasets
-combined = orders.merge(users, left_on='user_id', right_on='id')
-user_spending = combined.groupby('username')['total_amount'].sum()
-```
-
-### Run Analysis Examples
-
-```bash
-# Run comprehensive data analysis example
-python examples/analyze_mock_data.py
-
-# Start interactive Python session with data loaded
-python -i contracts_cli.py
-```
-
-### Why Python Integration?
-
-- **Rich querying**: Use Pandas' powerful query syntax
-- **Visualization**: Plot data with matplotlib, seaborn, plotly
-- **Statistics**: Perform statistical analysis with scipy, statsmodels
-- **Machine Learning**: Use scikit-learn, tensorflow for ML on mock data
-- **Interactive exploration**: Use Jupyter notebooks for exploratory analysis
-
-The Go CLI handles fast data generation, while Python provides the interactive analysis capabilities.
+The CLI focuses on generating realistic mock data. You control how to analyze it.
 
 ## Contributing
 

@@ -33,27 +33,13 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
 .Python
 env/
 venv/
 ENV/
 .venv
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-.pytest_cache/
 *.egg-info/
-dist/
-build/
-*.egg
 .ipynb_checkpoints/
 
-# Generated data
-*.csv
-*.xlsx
-*.json
-*.parquet
+# Mock data output directory
+mock_data/
