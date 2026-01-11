@@ -11,19 +11,19 @@ import (
 type ContractType string
 
 const (
-	OpenAPI   ContractType = "openapi"
-	ODCS      ContractType = "odcs"
-	AsyncAPI  ContractType = "asyncapi"
+	OpenAPI  ContractType = "openapi"
+	ODCS     ContractType = "odcs"
+	AsyncAPI ContractType = "asyncapi"
 )
 
 // Contract represents a contract file
 type Contract struct {
-	Domain   string
-	Service  string
-	Type     ContractType
-	Name     string
-	Path     string
-	Content  string
+	Domain  string
+	Service string
+	Type    ContractType
+	Name    string
+	Path    string
+	Content string
 }
 
 // Repository manages contract discovery and retrieval
@@ -57,7 +57,7 @@ func (r *Repository) ListDomains() ([]string, error) {
 func (r *Repository) ListServices(domain string) ([]string, error) {
 	services := []string{}
 	servicesDir := filepath.Join(r.baseDir, domain, "services")
-	
+
 	if _, err := os.Stat(servicesDir); os.IsNotExist(err) {
 		return services, nil
 	}
@@ -117,7 +117,7 @@ func (r *Repository) ListContracts(domain, service string) ([]Contract, error) {
 // GetContract retrieves a specific contract with its content
 func (r *Repository) GetContract(domain, service, contractType, name string) (*Contract, error) {
 	contractPath := filepath.Join(r.baseDir, domain, "services", service, "contracts", contractType, name)
-	
+
 	if _, err := os.Stat(contractPath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("contract not found: %s", contractPath)
 	}

@@ -38,7 +38,7 @@ Contracts are organized in a domains -> services -> contracts structure.`,
 					os.Exit(1)
 				}
 				domainsDir = filepath.Join(filepath.Dir(execPath), "domains")
-				
+
 				// If domains dir doesn't exist, try current directory
 				if _, err := os.Stat(domainsDir); os.IsNotExist(err) {
 					cwd, err := os.Getwd()
