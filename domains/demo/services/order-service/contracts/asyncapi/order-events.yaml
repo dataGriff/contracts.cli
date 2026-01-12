@@ -1,0 +1,75 @@
+asyncapi: 2.6.0
+info:
+  title: Order Service Events
+  version: 1.0.0
+  description: Async events emitted by the Order Service
+servers:
+  production:
+    url: kafka://kafka.example.com:9092
+    protocol: kafka
+    description: Production Kafka broker
+channels:
+  order.created:
+    description: Channel for order creation events
+    publish:
+      summary: Notify when a new order is created
+      message:
+        $ref: '#/components/messages/OrderCreated'
+  order.updated:
+    description: Channel for order update events
+    publish:
+      summary: Notify when an order is updated
+      message:
+        $ref: '#/components/messages/OrderUpdated'
+  order.cancelled:
+    description: Channel for order cancellation events
+    publish:
+      summary: Notify when an order is cancelled
+      message:
+        $ref: '#/components/messages/OrderCancelled'
+components:
+  messages:
+    OrderCreated:
+      name: OrderCreated
+      title: Order Created Event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          orderId:
+            type: string
+          userId:
+            type: string
+          totalAmount:
+            type: number
+          timestamp:
+            type: string
+            format: date-time
+    OrderUpdated:
+      name: OrderUpdated
+      title: Order Updated Event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          orderId:
+            type: string
+          status:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+    OrderCancelled:
+      name: OrderCancelled
+      title: Order Cancelled Event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          orderId:
+            type: string
+          reason:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
